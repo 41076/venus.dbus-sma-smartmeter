@@ -158,6 +158,7 @@ class DbusSMAEMService(object):
            self._update(sock.recv(1024))
 
     def _update(self, data):
+        logger.debug("Received data packet")
 
         try:
             arrlen = len(data)
