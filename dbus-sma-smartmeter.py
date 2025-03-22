@@ -138,6 +138,11 @@ class DbusSMAEMService(object):
             socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
         threading.Thread(target=self._alive, args=(self._sock,)).start()
+        
+        # Refresh multicast join beacuse some switches loos the multicast group if no Multicast Add is send       
+        GLib.timeout_add_seconds(30, self._rejoin_multicast)
+        
+        # Register our service
         self._dbusservice.register()
 
 
@@ -261,6 +266,16 @@ class DbusSMAEMService(object):
     def _handlechangedvalue(self, path, value):
         logger.debug("someone else updated %s to %s" % (path, value))
         return True  # accept the change
+    
+    # Refresh multicast join beacuse some switches loos the multicast group if no Multicast Add is send
+    def _rejoin_multicast(self):
+        try:
+            mreq = struct.pack("4sl", socket.inet_aton(MULTICAST_IP), socket.INADDR_ANY)
+            self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+            logger.debug("Refreshed multicast join")
+        except Exception as e:
+            logger.warning(f"Failed to refresh multicast join: {e}")
+        return True
 
 def main():
 
