@@ -101,7 +101,7 @@ class DbusSMAEMService(object):
             0x00000007: {'name': 'L3_current',          'length': 0, 'factor': 1,         'unit': 'A',   'value': 0, 'path': '/Ac/L3/Current'},
         }
 
-        self._dbusservice = VeDbusService(servicename)
+        self._dbusservice = VeDbusService(servicename, register=False)
         logger.info('Connected to dbus, DbusSMAEMService class created')
         logger.debug("%s /DeviceInstance = %d" %
                       (servicename, deviceinstance))
@@ -138,6 +138,8 @@ class DbusSMAEMService(object):
             socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
         threading.Thread(target=self._alive, args=(self._sock,)).start()
+        self._dbusservice.register()
+
 
     def _alive(self, sock):
         logger.info('Socket Thread started')
