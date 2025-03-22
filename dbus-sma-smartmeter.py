@@ -96,7 +96,7 @@ class DbusSMAEMService(object):
             0x00000001: {'name': 'power',               'length': 0, 'factor': 1,         'unit': 'W',   'value': 0, 'path': '/Ac/Power'},
             0x00000002: {'name': 'L1_power',            'length': 0, 'factor': 1,         'unit': 'W',   'value': 0, 'path': '/Ac/L1/Power'},
             0x00000003: {'name': 'L2_power',            'length': 0, 'factor': 1,         'unit': 'W',   'value': 0, 'path': '/Ac/L2/Power'},
-            0x00000004: {'name': 'L2_power',            'length': 0, 'factor': 1,         'unit': 'W',   'value': 0, 'path': '/Ac/L3/Power'},
+            0x00000004: {'name': 'L3_power',            'length': 0, 'factor': 1,         'unit': 'W',   'value': 0, 'path': '/Ac/L3/Power'},
             0x00000005: {'name': 'L1_current',          'length': 0, 'factor': 1,         'unit': 'A',   'value': 0, 'path': '/Ac/L1/Current'},
             0x00000006: {'name': 'L2_current',          'length': 0, 'factor': 1,         'unit': 'A',   'value': 0, 'path': '/Ac/L2/Current'},
             0x00000007: {'name': 'L3_current',          'length': 0, 'factor': 1,         'unit': 'A',   'value': 0, 'path': '/Ac/L3/Current'},
@@ -125,6 +125,7 @@ class DbusSMAEMService(object):
 
         self._last_data_timestamp = time.time()
         GLib.timeout_add_seconds(10, self._check_data_freshness)
+
 
         for obis_value in self._obis_points.values():
             if obis_value['path'] != '':
@@ -265,7 +266,7 @@ class DbusSMAEMService(object):
             logger.info("WARNING: Could not read from SMA Energy Meter")
             self._dbusservice['/Ac/Power'] = 0
         #logger.info('Update done') To check if update is done and SMA data is available
-        self._last_data_timestamp = time.time()
+            self._last_data_timestamp = time.time()
         return True
 
     def _handlechangedvalue(self, path, value):
@@ -281,20 +282,22 @@ class DbusSMAEMService(object):
         except Exception as e:
             logger.warning(f"Failed to refresh multicast join: {e}")
         return True
-def _check_data_freshness(self):
-    try:
-        elapsed = time.time() - self._last_data_timestamp
-        if elapsed > 30:
-            if self._dbusservice['/Connected'] != 0:
-                logger.warning("SMA data timeout. Setting /Connected = 0")
-                self._dbusservice['/Connected'] = 0
-        else:
-            if self._dbusservice['/Connected'] != 1:
-                logger.info("SMA data restored. Setting /Connected = 1")
-                self._dbusservice['/Connected'] = 1
-    except Exception as e:
-        logger.error(f"Error in _check_data_freshness: {e}")
-    return True  # keep repeating every 10 sec
+    
+    # Check if data is fresh, else set /Connected to 0
+    def _check_data_freshness(self):
+        try:
+            elapsed = time.time() - self._last_data_timestamp
+            if elapsed > 30:
+                if self._dbusservice['/Connected'] != 0:
+                    logger.warning("SMA data timeout. Setting /Connected = 0")
+                    self._dbusservice['/Connected'] = 0
+            else:
+                if self._dbusservice['/Connected'] != 1:
+                    logger.info("SMA data restored. Setting /Connected = 1")
+                    self._dbusservice['/Connected'] = 1
+        except Exception as e:
+            logger.error(f"Error in _check_data_freshness: {e}")
+        return True  # keep repeating every 10 sec
 
 def main():
 
