@@ -24,6 +24,7 @@ from logging.handlers import RotatingFileHandler
 import sys
 import os
 import threading
+import time
 
 MULTICAST_IP = "239.12.255.254"
 MULTICAST_PORT = 9522
@@ -121,6 +122,9 @@ class DbusSMAEMService(object):
         self._dbusservice.add_path('/Serial', 0)
         self._dbusservice.add_path('/Connected', 1)
         self._dbusservice.add_path('/UpdateIndex', 0)
+
+        self._last_data_timestamp = time.time()
+        GLib.timeout_add_seconds(10, self._check_data_freshness)
 
         for obis_value in self._obis_points.values():
             if obis_value['path'] != '':
@@ -260,7 +264,8 @@ class DbusSMAEMService(object):
         except:
             logger.info("WARNING: Could not read from SMA Energy Meter")
             self._dbusservice['/Ac/Power'] = 0
-
+        #logger.info('Update done') To check if update is done and SMA data is available
+        self._last_data_timestamp = time.time()
         return True
 
     def _handlechangedvalue(self, path, value):
@@ -276,6 +281,20 @@ class DbusSMAEMService(object):
         except Exception as e:
             logger.warning(f"Failed to refresh multicast join: {e}")
         return True
+def _check_data_freshness(self):
+    try:
+        elapsed = time.time() - self._last_data_timestamp
+        if elapsed > 30:
+            if self._dbusservice['/Connected'] != 0:
+                logger.warning("SMA data timeout. Setting /Connected = 0")
+                self._dbusservice['/Connected'] = 0
+        else:
+            if self._dbusservice['/Connected'] != 1:
+                logger.info("SMA data restored. Setting /Connected = 1")
+                self._dbusservice['/Connected'] = 1
+    except Exception as e:
+        logger.error(f"Error in _check_data_freshness: {e}")
+    return True  # keep repeating every 10 sec
 
 def main():
 
