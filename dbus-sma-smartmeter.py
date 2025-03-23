@@ -276,7 +276,7 @@ class DbusSMAEMService(object):
         logger.debug("someone else updated %s to %s" % (path, value))
         return True  # accept the change
     
-    # Refresh multicast join beacuse some switches loos the multicast group if no Multicast Add is send
+    # Refresh multicast join beacuse some switches lose the multicast group if no Multicast Add is send
     def _rejoin_multicast(self):
         try:
             mreq = struct.pack("4sl", socket.inet_aton(MULTICAST_IP), socket.INADDR_ANY)
