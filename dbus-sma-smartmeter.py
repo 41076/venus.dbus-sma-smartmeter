@@ -158,7 +158,7 @@ class DbusSMAEMService(object):
            self._update(sock.recv(1024))
 
     def _update(self, data):
-        logger.debug("Received data packet")
+        #logger.debug("Received data packet")
 
         try:
             arrlen = len(data)
@@ -263,12 +263,13 @@ class DbusSMAEMService(object):
                 if index > 255:
                     index = 0
                 self._dbusservice['/UpdateIndex'] = index
+                
+                #logger.info('Update done') To check if update is done and SMA data is available
+                self._last_data_timestamp = time.time()
 
         except:
             logger.info("WARNING: Could not read from SMA Energy Meter")
             self._dbusservice['/Ac/Power'] = 0
-        #logger.info('Update done') To check if update is done and SMA data is available
-            self._last_data_timestamp = time.time()
         return True
 
     def _handlechangedvalue(self, path, value):
