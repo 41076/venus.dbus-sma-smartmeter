@@ -2,7 +2,7 @@
 
 """
 Created by Waldmensch aka Waldmaus in 2023.
-Changed by Ersus in Q1 2025
+Changed by Ersus in 202503
 
 Inspired by:
  - https://github.com/RalfZim/venus.dbus-fronius-smartmeter (Inspiration)
