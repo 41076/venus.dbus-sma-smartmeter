@@ -145,8 +145,9 @@ class DbusSMAEMService(object):
 
         threading.Thread(target=self._alive, args=(self._sock,)).start()
         
-        # Refresh multicast join beacuse some switches loos the multicast group if no Multicast Add is send       
-        GLib.timeout_add_seconds(30, self._rejoin_multicast)
+        # Refresh multicast join beacuse some switches loose the multicast group if no Multicast Add is send       
+        
+        #GLib.timeout_add_seconds(30, self._rejoin_multicast)
         
         # Register our service
         self._dbusservice.register()
@@ -277,14 +278,14 @@ class DbusSMAEMService(object):
         return True  # accept the change
     
     # Refresh multicast join beacuse some switches lose the multicast group if no Multicast Add is send
-    def _rejoin_multicast(self):
-        try:
-            mreq = struct.pack("4sl", socket.inet_aton(MULTICAST_IP), socket.INADDR_ANY)
-            self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
-            logger.debug("Refreshed multicast join")
-        except Exception as e:
-            logger.warning(f"Failed to refresh multicast join: {e}")
-        return True
+    # def _rejoin_multicast(self):
+    #     try:
+    #         mreq = struct.pack("4sl", socket.inet_aton(MULTICAST_IP), socket.INADDR_ANY)
+    #         self._sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+    #         logger.debug("Refreshed multicast join")
+    #     except Exception as e:
+    #         logger.warning(f"Failed to refresh multicast join: {e}")
+    #     return True
     
     # Check if data is fresh, else set /Connected to 0
     def _check_data_freshness(self):
